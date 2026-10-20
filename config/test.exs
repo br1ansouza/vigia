@@ -3,7 +3,8 @@ import Config
 config :vigia,
   demo: false,
   req_sonda: [plug: {Req.Test, Vigia.Sonda.Http}],
-  req_tailscale: [plug: {Req.Test, Vigia.Tailscale}]
+  req_tailscale: [plug: {Req.Test, Vigia.Tailscale}],
+  req_push: [plug: {Req.Test, Vigia.Push}]
 
 config :vigia, VigiaWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4002],
