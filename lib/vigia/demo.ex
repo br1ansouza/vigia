@@ -9,19 +9,24 @@ defmodule Vigia.Demo do
   @spec alvos() :: [Alvo.t()]
   def alvos do
     [
-      alvo("api-pagamentos", "API de pagamentos", %{base: 45, variacao: 30, falha: 0.002}),
-      alvo("site", "Site institucional", %{base: 120, variacao: 80, falha: 0.0}),
-      alvo("busca", "Serviço de busca", %{base: 380, variacao: 900, falha: 0.01}),
-      alvo("fila", "Worker de filas", %{base: 25, variacao: 15, falha: 0.06}),
-      alvo("relatorios", "Gerador de relatórios", %{base: 900, variacao: 1_400, falha: 0.03}),
-      alvo("cdn", "CDN de imagens", %{base: 18, variacao: 12, falha: 0.0})
+      alvo("loja-site", "Loja", "Site", %{base: 120, variacao: 80, falha: 0.0}),
+      alvo("loja-api", "Loja", "API de pagamentos", %{base: 45, variacao: 30, falha: 0.002}),
+      alvo("loja-busca", "Loja", "Busca", %{base: 380, variacao: 900, falha: 0.01}),
+      alvo("interno-fila", "Interno", "Fila de e-mails", %{base: 25, variacao: 15, falha: 0.06}),
+      alvo("interno-relatorios", "Interno", "Relatórios", %{
+        base: 900,
+        variacao: 1_400,
+        falha: 0.03
+      }),
+      alvo("cdn", "CDN", "Imagens", %{base: 18, variacao: 12, falha: 0.0})
     ]
   end
 
-  defp alvo(id, nome, perfil) do
+  defp alvo(id, grupo, nome, perfil) do
     %Alvo{
       id: "demo-" <> id,
       nome: nome,
+      grupo: grupo,
       tipo: :demo,
       espaco: :demo,
       intervalo: 5_000,
