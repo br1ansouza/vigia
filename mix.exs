@@ -49,6 +49,7 @@ defmodule Vigia.MixProject do
       {:jason, "~> 1.4"},
       {:bandit, "~> 1.13"},
       {:req, "~> 0.7.5"},
+      {:postgrex, "~> 0.22.4"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false}
     ]

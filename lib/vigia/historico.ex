@@ -75,6 +75,25 @@ defmodule Vigia.Historico do
     :ets.select_delete(@leituras, [{{{:_, :"$1"}, :_, :_, :_}, [{:<, :"$1", antes_de}], [true]}])
   end
 
+  @doc """
+  Leituras e situação de um alvo num binário compacto, para o retrato.
+  """
+  @spec exportar(String.t()) :: binary() | nil
+  def exportar(alvo_id) do
+    case :ets.select(@leituras, [{{{alvo_id, :_}, :_, :_, :_}, [], [:"$_"]}]) do
+      [] -> nil
+      linhas -> :erlang.term_to_binary({linhas, :ets.lookup(@situacao, alvo_id)}, compressed: 6)
+    end
+  end
+
+  @spec importar(binary()) :: :ok
+  def importar(binario) do
+    {linhas, situacao} = :erlang.binary_to_term(binario, [:safe])
+    :ets.insert(@leituras, linhas)
+    :ets.insert(@situacao, situacao)
+    :ok
+  end
+
   defp para_leitura({{alvo_id, em}, resultado, latencia, detalhe}) do
     %Leitura{alvo_id: alvo_id, em: em, resultado: resultado, latencia: latencia, detalhe: detalhe}
   end
