@@ -10,6 +10,11 @@ if config_env() != :test do
   config :vigia,
     alvos_json: System.get_env("VIGIA_ALVOS"),
     senha_hash: System.get_env("VIGIA_SENHA_HASH")
+
+  config :vigia, Vigia.Tailscale,
+    oauth_id: System.get_env("TAILSCALE_OAUTH_ID"),
+    oauth_segredo: System.get_env("TAILSCALE_OAUTH_SEGREDO"),
+    token: System.get_env("TAILSCALE_TOKEN")
 end
 
 if config_env() == :dev do

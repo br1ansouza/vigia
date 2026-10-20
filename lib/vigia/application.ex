@@ -9,6 +9,7 @@ defmodule Vigia.Application do
     children = [
       {Phoenix.PubSub, name: Vigia.PubSub},
       Vigia.Acesso.Limite,
+      Vigia.Tailscale,
       {Vigia.Monitor, alvos()},
       VigiaWeb.Endpoint
     ]
