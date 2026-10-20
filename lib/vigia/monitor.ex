@@ -26,6 +26,14 @@ defmodule Vigia.Monitor do
     :persistent_term.get({__MODULE__, :alvos}, []) |> Enum.filter(&(&1.espaco == espaco))
   end
 
+  @spec grupos(Alvo.espaco()) :: [{String.t(), [Alvo.t()]}]
+  def grupos(espaco) do
+    alvos = alvos(espaco)
+    ordem = alvos |> Enum.map(&Alvo.grupo/1) |> Enum.uniq()
+    porgrupo = Enum.group_by(alvos, &Alvo.grupo/1)
+    Enum.map(ordem, &{&1, Map.fetch!(porgrupo, &1)})
+  end
+
   @spec alvo(String.t()) :: Alvo.t() | nil
   def alvo(id), do: :persistent_term.get({__MODULE__, :alvos}, []) |> Enum.find(&(&1.id == id))
 
