@@ -6,6 +6,10 @@ end
 
 config :vigia, VigiaWeb.Endpoint, http: [port: String.to_integer(System.get_env("PORT", "4000"))]
 
+if config_env() != :test do
+  config :vigia, alvos_json: System.get_env("VIGIA_ALVOS")
+end
+
 if config_env() == :dev do
   config :vigia, VigiaWeb.Endpoint,
     live_reload: [
