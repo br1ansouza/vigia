@@ -69,13 +69,6 @@ defmodule VigiaWeb.PainelLive do
           </p>
         </div>
         <.link
-          :if={@espaco == :demo and @login_habilitado}
-          href={~p"/entrar"}
-          class="text-sm text-suave underline underline-offset-2 hover:text-texto"
-        >
-          Entrar
-        </.link>
-        <.link
           :if={@espaco == :real}
           href={~p"/sair"}
           method="delete"
@@ -84,6 +77,23 @@ defmodule VigiaWeb.PainelLive do
           Sair
         </.link>
       </header>
+
+      <div
+        :if={@espaco == :demo}
+        class="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-destaque/40 bg-destaque/8 px-4 py-3 text-sm"
+      >
+        <p>
+          Dados fictícios de demonstração, simulados pelo próprio Vigia.
+          <span :if={@login_habilitado}>Entre para ver os serviços reais.</span>
+        </p>
+        <.link
+          :if={@login_habilitado}
+          href={~p"/entrar"}
+          class="rounded-lg bg-texto px-3 py-1.5 text-sm font-medium text-fundo hover:opacity-90"
+        >
+          Entrar
+        </.link>
+      </div>
 
       <p :if={@vazio} class="mt-10 text-sm text-suave">
         Nenhum alvo configurado. Defina <code class="font-mono">VIGIA_ALVOS</code>.
