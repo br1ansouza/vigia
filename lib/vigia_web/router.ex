@@ -15,6 +15,12 @@ defmodule VigiaWeb.Router do
   scope "/", VigiaWeb do
     pipe_through :browser
 
-    live "/", PainelLive
+    get "/entrar", SessaoController, :new
+    post "/entrar", SessaoController, :create
+    delete "/sair", SessaoController, :delete
+
+    live_session :painel, on_mount: {VigiaWeb.Acesso, :padrao} do
+      live "/", PainelLive
+    end
   end
 end
