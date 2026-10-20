@@ -57,4 +57,12 @@ defmodule VigiaWeb.PainelLiveTest do
     assert has_element?(view, "#grupo-grupo_0 #grupo_0-painel-c")
     assert has_element?(view, "#grupo-grupo_1 #grupo_1-painel-b")
   end
+
+  test "na demonstração não há botão de avisos e o evento é ignorado", %{conn: conn} do
+    {:ok, view, _html} = live(conn, ~p"/")
+
+    refute has_element?(view, "#avisos")
+    render_hook(view, "inscrever", %{"endpoint" => "https://push.teste/demo", "keys" => %{}})
+    refute Enum.any?(Vigia.Inscricoes.todas(), &(&1.endpoint == "https://push.teste/demo"))
+  end
 end

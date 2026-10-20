@@ -12,8 +12,15 @@ if config_env() != :test do
     senha_hash: System.get_env("VIGIA_SENHA_HASH")
 
   if url = System.get_env("DATABASE_URL") do
-    config :vigia, Vigia.Retrato, {Vigia.Retrato.Postgres, Vigia.Retrato.Postgres.opcoes(url)}
+    config :vigia, Vigia.Banco, Vigia.Banco.opcoes(url)
+    config :vigia, Vigia.Retrato, {Vigia.Retrato.Postgres, []}
+    config :vigia, Vigia.Inscricoes, Vigia.Inscricoes.Postgres
   end
+
+  config :vigia, Vigia.Push,
+    publica: System.get_env("VAPID_PUBLICA"),
+    privada: System.get_env("VAPID_PRIVADA"),
+    contato: "https://" <> System.get_env("PHX_HOST", "localhost")
 
   config :vigia, Vigia.Tailscale,
     oauth_id: System.get_env("TAILSCALE_OAUTH_ID"),
