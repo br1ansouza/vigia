@@ -6,6 +6,7 @@ defmodule Vigia.Monitor do
       Monitor
       ├── Registry (Vigia.Registro)
       ├── Historico (dono das tabelas ETS)
+      ├── Retrato (restaura e salva o histórico no Postgres)
       ├── DynamicSupervisor (Vigia.Verificadores)
       │   └── Verificador, um por alvo
       └── Task que inicia os verificadores
@@ -35,6 +36,7 @@ defmodule Vigia.Monitor do
     children = [
       {Registry, keys: :unique, name: Vigia.Registro},
       Vigia.Historico,
+      {Vigia.Retrato, alvos},
       {DynamicSupervisor, name: Vigia.Verificadores, strategy: :one_for_one},
       Supervisor.child_spec({Task, fn -> Enum.each(alvos, &iniciar/1) end}, restart: :transient)
     ]
