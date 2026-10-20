@@ -11,6 +11,10 @@ if config_env() != :test do
     alvos_json: System.get_env("VIGIA_ALVOS"),
     senha_hash: System.get_env("VIGIA_SENHA_HASH")
 
+  if url = System.get_env("DATABASE_URL") do
+    config :vigia, Vigia.Retrato, {Vigia.Retrato.Postgres, Vigia.Retrato.Postgres.opcoes(url)}
+  end
+
   config :vigia, Vigia.Tailscale,
     oauth_id: System.get_env("TAILSCALE_OAUTH_ID"),
     oauth_segredo: System.get_env("TAILSCALE_OAUTH_SEGREDO"),

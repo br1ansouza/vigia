@@ -12,12 +12,13 @@ Sem login aparece uma demonstração com serviços inventados. Os meus ficam atr
 
 Cada serviço monitorado é um GenServer. Ele acorda no intervalo configurado, faz a verificação, grava o resultado numa tabela ETS e avisa pelo PubSub. O LiveView recebe o aviso e reenvia só o cartão daquele serviço.
 
-Não tem banco. O painel mostra as últimas 24 horas, então guardo isso em memória e apago o resto de tempos em tempos. Se o servidor reiniciar, o histórico zera, e pra esse uso tudo bem.
+O painel mostra as últimas 24 horas, e elas ficam em memória, no ETS. Pra não perder tudo a cada deploy, uma vez por minuto cada serviço vira uma linha no Postgres gratuito do Gigalixir, com o `term_to_binary` comprimido das leituras. Na subida, o Vigia restaura isso antes de voltar a verificar. Não usei Ecto: são três comandos SQL com Postgrex.
 
 ```
 Vigia.Monitor (rest_for_one)
 ├── Registry            acha o processo de cada serviço pelo id
 ├── Vigia.Historico     dono das tabelas ETS
+├── Vigia.Retrato       salva e restaura o histórico no Postgres
 ├── DynamicSupervisor
 │   └── Vigia.Verificador (um por serviço)
 └── Task                sobe os verificadores
@@ -59,6 +60,7 @@ Tudo por variável de ambiente, nada fica no repositório.
 | `VIGIA_SENHA_HASH` | `mix vigia.senha`. Sem ela, só a demonstração funciona |
 | `VIGIA_ALVOS` | lista JSON, exemplo em `alvos.example.json` |
 | `TAILSCALE_OAUTH_ID` e `TAILSCALE_OAUTH_SEGREDO` | cliente OAuth com leitura de Devices Core |
+| `DATABASE_URL` | opcional. Sem ele, o histórico some quando o app reinicia |
 
 Cada serviço tem `id`, `nome` e `tipo` (`http` ou `tailscale`). O `http` pede `url` e o `tailscale` pede `dispositivo`, que é o nome da máquina no Tailscale. Opcionais: `intervalo` e `tempo_limite` em segundos (padrão 30 e 5) e `lento_ms` (padrão 1500).
 
