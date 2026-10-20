@@ -10,5 +10,6 @@ defmodule Vigia.Sonda do
 
   @spec para(Alvo.t()) :: module()
   def para(%Alvo{tipo: :http}), do: Vigia.Sonda.Http
+  def para(%Alvo{tipo: :tailscale}), do: Vigia.Sonda.Tailscale
   def para(%Alvo{tipo: :demo}), do: Vigia.Sonda.Demo
 end

@@ -1,6 +1,9 @@
 import Config
 
-config :vigia, demo: false, req_sonda: [plug: {Req.Test, Vigia.Sonda.Http}]
+config :vigia,
+  demo: false,
+  req_sonda: [plug: {Req.Test, Vigia.Sonda.Http}],
+  req_tailscale: [plug: {Req.Test, Vigia.Tailscale}]
 
 config :vigia, VigiaWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4002],
