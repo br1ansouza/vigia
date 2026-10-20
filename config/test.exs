@@ -1,5 +1,7 @@
 import Config
 
+config :vigia, demo: false, req_sonda: [plug: {Req.Test, Vigia.Sonda.Http}]
+
 config :vigia, VigiaWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4002],
   secret_key_base: "4hpB3H1gSBz8YsXTdT/m4+7LsLikE1j2mRziw1MXJ6S2CsOmxBAnStbakjTikdXE",
