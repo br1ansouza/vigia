@@ -2,6 +2,8 @@
 
 Monitor de serviços em tempo real, escrito em Elixir com OTP e Phoenix LiveView.
 
+**[vigia.gigalixirapp.com](https://vigia.gigalixirapp.com)**: demonstração ao vivo.
+
 Cada serviço monitorado é um processo próprio. O painel recebe cada leitura pelo WebSocket do LiveView e redesenha só o cartão que mudou. Não tem banco de dados, framework JavaScript nem biblioteca de gráficos: o histórico fica em ETS e a linha do tempo é SVG gerado no servidor.
 
 ![Painel em modo demonstração](docs/painel.png)
