@@ -12,6 +12,7 @@ defmodule Vigia.Alvo do
     :tipo,
     :url,
     :dispositivo,
+    :grupo,
     aceita_status: [],
     espaco: :real,
     intervalo: 30_000,
@@ -27,6 +28,7 @@ defmodule Vigia.Alvo do
           tipo: :http | :tailscale | :demo,
           url: String.t() | nil,
           dispositivo: String.t() | nil,
+          grupo: String.t() | nil,
           aceita_status: [100..599],
           espaco: espaco(),
           intervalo: pos_integer(),
@@ -83,6 +85,7 @@ defmodule Vigia.Alvo do
            id: id,
            nome: nome,
            tipo: tipo,
+           grupo: texto(mapa["grupo"]),
            intervalo: segundos(mapa, "intervalo", 30),
            tempo_limite: segundos(mapa, "tempo_limite", 5),
            lento: Map.get(mapa, "lento_ms", 1_500)
@@ -119,12 +122,20 @@ defmodule Vigia.Alvo do
 
   defp campos(:tailscale, %{"id" => id}), do: {:error, "alvo #{id}: dispositivo obrigatório"}
 
+  defp texto(valor) when is_binary(valor) and valor != "", do: valor
+  defp texto(_valor), do: nil
+
   defp segundos(mapa, chave, padrao) do
     case Map.get(mapa, chave, padrao) do
       valor when is_integer(valor) and valor > 0 -> valor * 1_000
       _ -> padrao * 1_000
     end
   end
+
+  @doc "Nome da seção do painel. Sem grupo, o alvo forma uma seção sozinho."
+  @spec grupo(t()) :: String.t()
+  def grupo(%__MODULE__{grupo: nil, nome: nome}), do: nome
+  def grupo(%__MODULE__{grupo: grupo}), do: grupo
 
   @spec mede_latencia?(t()) :: boolean()
   def mede_latencia?(%__MODULE__{tipo: :tailscale}), do: false

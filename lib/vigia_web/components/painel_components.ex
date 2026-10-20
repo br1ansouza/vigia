@@ -18,7 +18,7 @@ defmodule VigiaWeb.PainelComponents do
     ~H"""
     <article id={@id} class="flex flex-col rounded-xl border border-borda bg-superficie p-4">
       <header class="flex items-start justify-between gap-3">
-        <h2 class="truncate text-sm font-medium">{@resumo.nome}</h2>
+        <h3 class="truncate text-sm font-medium">{@resumo.nome}</h3>
         <.selo resultado={@resumo.resultado} />
       </header>
 

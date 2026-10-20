@@ -1,8 +1,9 @@
 defmodule VigiaWeb.PainelLive do
   @moduledoc """
   O painel assina o tópico do espaço e, a cada leitura, reenvia só o cartão do
-  alvo que mudou. Os cartões ficam num stream: o servidor não guarda a lista
-  depois do primeiro render.
+  alvo que mudou. Cada grupo tem seu stream: o servidor não guarda os cartões
+  depois do primeiro render, só o resultado atual de cada alvo para as
+  contagens.
   """
 
   use VigiaWeb, :live_view
@@ -16,32 +17,46 @@ defmodule VigiaWeb.PainelLive do
     espaco = socket.assigns.espaco
     if connected?(socket), do: Phoenix.PubSub.subscribe(Vigia.PubSub, Verificador.topico(espaco))
 
-    resumos = espaco |> Monitor.alvos() |> Enum.map(&Resumo.de/1)
+    grupos =
+      espaco
+      |> Monitor.grupos()
+      |> Enum.with_index(fn {nome, alvos}, i ->
+        %{nome: nome, chave: String.to_atom("grupo_#{i}"), resumos: Enum.map(alvos, &Resumo.de/1)}
+      end)
+
+    socket =
+      Enum.reduce(grupos, socket, fn grupo, socket ->
+        stream(socket, grupo.chave, grupo.resumos)
+      end)
 
     {:ok,
      socket
      |> assign(
        espaco: espaco,
        page_title: "Painel",
-       vazio: resumos == []
+       vazio: grupos == [],
+       grupos:
+         Enum.map(
+           grupos,
+           &%{nome: &1.nome, chave: &1.chave, ids: Enum.map(&1.resumos, fn r -> r.id end)}
+         ),
+       grupo_de: for(g <- grupos, r <- g.resumos, into: %{}, do: {r.id, g.chave})
      )
-     |> com_resultados(Map.new(resumos, &{&1.id, &1.resultado}))
-     |> stream(:alvos, resumos)}
+     |> com_resultados(for g <- grupos, r <- g.resumos, into: %{}, do: {r.id, r.resultado})}
   end
 
   @impl true
   def handle_info({:leitura, %Leitura{alvo_id: id}}, socket) do
-    case Monitor.alvo(id) do
-      nil ->
-        {:noreply, socket}
+    with %{} = alvo <- Monitor.alvo(id),
+         {:ok, chave} <- Map.fetch(socket.assigns.grupo_de, id) do
+      resumo = Resumo.de(alvo)
 
-      alvo ->
-        resumo = Resumo.de(alvo)
-
-        {:noreply,
-         socket
-         |> stream_insert(:alvos, resumo)
-         |> com_resultados(Map.put(socket.assigns.resultados, id, resumo.resultado))}
+      {:noreply,
+       socket
+       |> stream_insert(chave, resumo)
+       |> com_resultados(Map.put(socket.assigns.resultados, id, resumo.resultado))}
+    else
+      _ -> {:noreply, socket}
     end
   end
 
@@ -99,12 +114,31 @@ defmodule VigiaWeb.PainelLive do
         Nenhum alvo configurado. Defina <code class="font-mono">VIGIA_ALVOS</code>.
       </p>
 
-      <section
-        id="alvos"
-        phx-update="stream"
-        class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
-      >
-        <.cartao :for={{dom_id, resumo} <- @streams.alvos} id={dom_id} resumo={resumo} />
+      <section :for={grupo <- @grupos} class="mt-8">
+        <header class="mb-3 flex items-baseline justify-between gap-3">
+          <h2 class="text-sm font-semibold tracking-tight">{grupo.nome}</h2>
+          <p class="text-xs text-suave">
+            <span class={[
+              "font-mono",
+              @contagens[grupo.chave].fora > 0 && "text-fora",
+              @contagens[grupo.chave].fora == 0 && "text-texto"
+            ]}>
+              {@contagens[grupo.chave].no_ar}/{@contagens[grupo.chave].total}
+            </span>
+            no ar
+          </p>
+        </header>
+        <div
+          id={"grupo-#{grupo.chave}"}
+          phx-update="stream"
+          class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
+        >
+          <.cartao
+            :for={{dom_id, resumo} <- Map.fetch!(@streams, grupo.chave)}
+            id={dom_id}
+            resumo={resumo}
+          />
+        </div>
       </section>
 
       <footer class="mt-10 text-xs text-suave">
@@ -118,6 +152,15 @@ defmodule VigiaWeb.PainelLive do
   end
 
   defp com_resultados(socket, resultados) do
-    assign(socket, resultados: resultados, contagem: Resumo.contagem(Map.values(resultados)))
+    contagens =
+      Map.new(socket.assigns.grupos, fn grupo ->
+        {grupo.chave, grupo.ids |> Enum.map(&Map.fetch!(resultados, &1)) |> Resumo.contagem()}
+      end)
+
+    assign(socket,
+      resultados: resultados,
+      contagem: Resumo.contagem(Map.values(resultados)),
+      contagens: contagens
+    )
   end
 end

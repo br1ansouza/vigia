@@ -53,4 +53,15 @@ defmodule Vigia.AlvoTest do
     assert {:error, _} = Alvo.de_json(~s([{#{base},"aceita_status":["403"]}]))
     assert {:error, _} = Alvo.de_json(~s([{#{base},"aceita_status":403}]))
   end
+
+  test "grupo é opcional e, sem ele, a seção leva o nome do alvo" do
+    json = ~s([
+      {"id":"a","nome":"API","tipo":"http","url":"https://a.dev","grupo":"TrackRide"},
+      {"id":"b","nome":"PistaCerta","tipo":"http","url":"https://b.dev"}
+    ])
+
+    assert {:ok, [a, b]} = Alvo.de_json(json)
+    assert Alvo.grupo(a) == "TrackRide"
+    assert Alvo.grupo(b) == "PistaCerta"
+  end
 end
