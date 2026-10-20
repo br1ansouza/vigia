@@ -1,0 +1,33 @@
+version: 2
+updates:
+  - package-ecosystem: mix
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    target-branch: dev
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      phoenix:
+        patterns:
+          - "phoenix*"
+          - "bandit"
+          - "lazy_html"
+      dev:
+        dependency-type: development
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    target-branch: dev
+    commit-message:
+      prefix: ci
+    groups:
+      actions:
+        patterns:
+          - "*"
