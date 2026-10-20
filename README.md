@@ -30,6 +30,8 @@ O gráfico de barras é SVG montado no servidor. O único JavaScript é o que j�
 
 As câmeras de casa só existem dentro da minha rede Tailscale, e o Vigia não entra nela. Ele pergunta pra API do Tailscale se o aparelho está conectado. Um processo guarda o token e a lista de aparelhos por 20 segundos, assim várias verificações ao mesmo tempo viram uma chamada só.
 
+Quando um serviço cai ou volta, o Vigia manda uma notificação push pro meu celular, onde ele está instalado como app pela tela inicial. Não usei biblioteca de Web Push: a cifragem (RFC 8291) e a assinatura VAPID (RFC 8292) são feitas com `:crypto`, e o teste confere byte a byte o exemplo da própria RFC. Pra não apitar à toa, só avisa "fora" depois de duas falhas seguidas.
+
 A senha fica salva só como hash PBKDF2, feito com o `:crypto` do próprio Erlang. O login trava depois de cinco tentativas erradas do mesmo IP.
 
 ## Rodando local
@@ -60,6 +62,7 @@ Tudo por variável de ambiente, nada fica no repositório.
 | `VIGIA_SENHA_HASH` | `mix vigia.senha`. Sem ela, só a demonstração funciona |
 | `VIGIA_ALVOS` | lista JSON, exemplo em `alvos.example.json` |
 | `TAILSCALE_OAUTH_ID` e `TAILSCALE_OAUTH_SEGREDO` | cliente OAuth com leitura de Devices Core |
+| `VAPID_PUBLICA` e `VAPID_PRIVADA` | `mix vigia.vapid`. Sem elas, não tem aviso push |
 | `DATABASE_URL` | opcional. Sem ele, o histórico some quando o app reinicia |
 
 Cada serviço tem `id`, `nome` e `tipo` (`http` ou `tailscale`). O `http` pede `url` e o `tailscale` pede `dispositivo`, que é o nome da máquina no Tailscale. Opcionais: `intervalo` e `tempo_limite` em segundos (padrão 30 e 5) e `lento_ms` (padrão 1500).

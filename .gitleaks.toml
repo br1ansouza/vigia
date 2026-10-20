@@ -2,5 +2,5 @@
 useDefault = true
 
 [allowlist]
-description = "Chaves de dev e teste geradas pelo Phoenix, sem uso em produção"
-paths = ['''config/dev\.exs''', '''config/test\.exs''']
+description = "Chaves de dev e teste do Phoenix e o vetor de exemplo público da RFC 8291"
+paths = ['''config/dev\.exs''', '''config/test\.exs''', '''test/vigia/push_test\.exs''']
