@@ -98,6 +98,7 @@ Campos de um alvo:
 | `tipo` | `http` ou `tailscale` | |
 | `url` | para `http`; 2xx e 3xx contam como no ar | |
 | `dispositivo` | para `tailscale`; hostname ou início do nome MagicDNS | |
+| `aceita_status` | para `http`; códigos extras que contam como no ar, como `[403]` em site com bloqueio geográfico | `[]` |
 | `intervalo` | segundos entre verificações | 30 |
 | `tempo_limite` | segundos até desistir | 5 |
 | `lento_ms` | acima disso, a leitura fica `lento` | 1500 |

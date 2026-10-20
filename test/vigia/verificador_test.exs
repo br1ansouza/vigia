@@ -31,6 +31,15 @@ defmodule Vigia.VerificadorTest do
                Verificador.medir(alvo(), Vigia.Sonda.Http)
     end
 
+    test "status listado em aceita_status fica no ar" do
+      Req.Test.stub(Vigia.Sonda.Http, &Plug.Conn.send_resp(&1, 403, ""))
+
+      assert %Leitura{resultado: :no_ar, detalhe: "HTTP 403"} =
+               Verificador.medir(alvo(aceita_status: [403]), Vigia.Sonda.Http)
+
+      assert %Leitura{resultado: :fora} = Verificador.medir(alvo(), Vigia.Sonda.Http)
+    end
+
     test "falha de transporte fica fora com motivo legível" do
       Req.Test.stub(Vigia.Sonda.Http, &Req.Test.transport_error(&1, :econnrefused))
 
