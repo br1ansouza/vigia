@@ -1,0 +1,55 @@
+@import "tailwindcss" source(none);
+@import "phoenix-colocated/vigia/colocated.css";
+@source "../css";
+@source "../js";
+@source "../../lib/vigia_web";
+@source "../../_build/dev/phoenix-colocated/vigia/*/";
+
+@plugin "../vendor/heroicons";
+
+@theme {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "Cascadia Mono", Menlo, monospace;
+
+  --color-fundo: #f6f6f4;
+  --color-superficie: #ffffff;
+  --color-borda: #e4e4df;
+  --color-texto: #1b1b1a;
+  --color-suave: #6b6b66;
+  --color-no-ar: #1f9d55;
+  --color-fora: #d64545;
+  --color-lento: #c98a12;
+  --color-sem-dado: #9a9a94;
+  --color-destaque: #6e4ad8;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-fundo: #111312;
+    --color-superficie: #191c1b;
+    --color-borda: #2a2e2c;
+    --color-texto: #e9ebe8;
+    --color-suave: #8d938f;
+    --color-no-ar: #3ecf7a;
+    --color-fora: #f06b6b;
+    --color-lento: #e8b04a;
+    --color-sem-dado: #5d625f;
+    --color-destaque: #a78bfa;
+  }
+}
+
+@custom-variant phx-click-loading (.phx-click-loading&, .phx-click-loading &);
+@custom-variant phx-submit-loading (.phx-submit-loading&, .phx-submit-loading &);
+@custom-variant phx-change-loading (.phx-change-loading&, .phx-change-loading &);
+
+[data-phx-session], [data-phx-teleported-src] { display: contents }
+
+html {
+  color-scheme: light dark;
+}
+
+body {
+  background: var(--color-fundo);
+  color: var(--color-texto);
+  font-feature-settings: "tnum";
+}

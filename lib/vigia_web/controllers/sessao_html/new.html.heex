@@ -1,0 +1,33 @@
+<Layouts.app flash={@flash}>
+  <div class="mx-auto mt-[12vh] max-w-xs">
+    <h1 class="text-xl font-semibold tracking-tight">Vigia</h1>
+    <p class="mt-1 text-sm text-suave">Entre para ver os serviços reais.</p>
+
+    <.form for={%{}} action={~p"/entrar"} class="mt-6 space-y-3">
+      <label class="block text-sm" for="senha">Senha</label>
+      <input
+        id="senha"
+        name="senha"
+        type="password"
+        autocomplete="current-password"
+        required
+        autofocus
+        class="w-full rounded-lg border border-borda bg-superficie px-3 py-2 font-mono text-sm outline-none focus:border-destaque"
+      />
+      <p :if={@erro} class="text-sm text-fora" role="alert">{@erro}</p>
+      <button
+        type="submit"
+        class="w-full cursor-pointer rounded-lg bg-texto px-3 py-2 text-sm font-medium text-fundo hover:opacity-90"
+      >
+        Entrar
+      </button>
+    </.form>
+
+    <.link
+      navigate={~p"/"}
+      class="mt-6 inline-block text-xs text-suave underline underline-offset-2"
+    >
+      Voltar para a demonstração
+    </.link>
+  </div>
+</Layouts.app>

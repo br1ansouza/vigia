@@ -1,0 +1,25 @@
+[
+  {
+    "id": "site",
+    "nome": "Site",
+    "tipo": "http",
+    "url": "https://exemplo.com",
+    "intervalo": 60
+  },
+  {
+    "id": "api",
+    "nome": "API",
+    "tipo": "http",
+    "url": "https://api.exemplo.com/saude",
+    "intervalo": 3600,
+    "tempo_limite": 90,
+    "lento_ms": 10000
+  },
+  {
+    "id": "camera",
+    "nome": "Câmera da sala",
+    "tipo": "tailscale",
+    "dispositivo": "tablet",
+    "intervalo": 60
+  }
+]
