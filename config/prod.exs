@@ -10,4 +10,6 @@ config :vigia, VigiaWeb.Endpoint,
     ]
   ]
 
+config :vigia, cookie_seguro: true
+
 config :logger, level: :info

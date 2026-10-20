@@ -13,7 +13,7 @@ defmodule VigiaWeb.PainelLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    espaco = socket.assigns[:espaco] || :demo
+    espaco = socket.assigns.espaco
     if connected?(socket), do: Phoenix.PubSub.subscribe(Vigia.PubSub, Verificador.topico(espaco))
 
     resumos = espaco |> Monitor.alvos() |> Enum.map(&Resumo.de/1)
@@ -68,6 +68,21 @@ defmodule VigiaWeb.PainelLive do
             </span>
           </p>
         </div>
+        <.link
+          :if={@espaco == :demo and @login_habilitado}
+          href={~p"/entrar"}
+          class="text-sm text-suave underline underline-offset-2 hover:text-texto"
+        >
+          Entrar
+        </.link>
+        <.link
+          :if={@espaco == :real}
+          href={~p"/sair"}
+          method="delete"
+          class="text-sm text-suave underline underline-offset-2 hover:text-texto"
+        >
+          Sair
+        </.link>
       </header>
 
       <p :if={@vazio} class="mt-10 text-sm text-suave">

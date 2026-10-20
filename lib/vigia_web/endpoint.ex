@@ -5,7 +5,11 @@ defmodule VigiaWeb.Endpoint do
     store: :cookie,
     key: "_vigia_key",
     signing_salt: "OO9q/1T9",
-    same_site: "Lax"
+    encryption_salt: "vigia-sessao",
+    same_site: "Lax",
+    http_only: true,
+    secure: Application.compile_env(:vigia, :cookie_seguro, false),
+    max_age: 30 * 24 * 60 * 60
   ]
 
   socket "/live", Phoenix.LiveView.Socket,
