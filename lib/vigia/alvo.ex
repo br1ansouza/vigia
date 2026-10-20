@@ -12,6 +12,7 @@ defmodule Vigia.Alvo do
     :tipo,
     :url,
     :dispositivo,
+    aceita_status: [],
     espaco: :real,
     intervalo: 30_000,
     tempo_limite: 5_000,
@@ -26,6 +27,7 @@ defmodule Vigia.Alvo do
           tipo: :http | :tailscale | :demo,
           url: String.t() | nil,
           dispositivo: String.t() | nil,
+          aceita_status: [100..599],
           espaco: espaco(),
           intervalo: pos_integer(),
           tempo_limite: pos_integer(),
@@ -98,7 +100,17 @@ defmodule Vigia.Alvo do
     end
   end
 
-  defp campos(:http, %{"url" => "http" <> _ = url}), do: {:ok, url: url}
+  defp campos(:http, %{"url" => "http" <> _ = url} = mapa) do
+    case Map.get(mapa, "aceita_status", []) do
+      lista when is_list(lista) ->
+        if Enum.all?(lista, &(is_integer(&1) and &1 in 100..599)),
+          do: {:ok, url: url, aceita_status: lista},
+          else: {:error, "alvo #{mapa["id"]}: aceita_status precisa ser lista de códigos HTTP"}
+
+      _ ->
+        {:error, "alvo #{mapa["id"]}: aceita_status precisa ser lista de códigos HTTP"}
+    end
+  end
 
   defp campos(:http, %{"id" => id}), do: {:error, "alvo #{id}: url http(s) obrigatória"}
 
