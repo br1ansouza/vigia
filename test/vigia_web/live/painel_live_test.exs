@@ -21,7 +21,7 @@ defmodule VigiaWeb.PainelLiveTest do
   test "sem entrar mostra só os alvos de demonstração", %{conn: conn} do
     {:ok, _view, html} = live(conn, ~p"/")
 
-    assert html =~ "demonstração"
+    assert html =~ "Dados fictícios de demonstração"
     assert html =~ "API"
     assert html =~ "aguardando"
     refute html =~ "Secreto"
