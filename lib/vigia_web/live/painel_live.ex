@@ -10,7 +10,7 @@ defmodule VigiaWeb.PainelLive do
 
   import VigiaWeb.PainelComponents
 
-  alias Vigia.{Leitura, Monitor, Resumo, Verificador}
+  alias Vigia.{Avisos, Inscricoes, Leitura, Monitor, Push, Resumo, Verificador}
 
   @impl true
   def mount(_params, _session, socket) do
@@ -34,6 +34,9 @@ defmodule VigiaWeb.PainelLive do
      |> assign(
        espaco: espaco,
        page_title: "Painel",
+       avisos: espaco == :real and Push.configurado?(),
+       avisos_ativos: false,
+       chave_vapid: Push.chave_publica(),
        vazio: grupos == [],
        grupos:
          Enum.map(
@@ -61,6 +64,33 @@ defmodule VigiaWeb.PainelLive do
   end
 
   @impl true
+  def handle_event(_evento, _params, %{assigns: %{avisos: false}} = socket),
+    do: {:noreply, socket}
+
+  def handle_event("avisos_estado", %{"ativo" => ativo}, socket),
+    do: {:noreply, assign(socket, avisos_ativos: ativo == true)}
+
+  def handle_event("inscrever", inscricao, socket) do
+    case Inscricoes.adicionar(inscricao) do
+      :ok ->
+        Avisos.testar()
+        {:noreply, socket |> assign(avisos_ativos: true) |> put_flash(:info, "Avisos ativados.")}
+
+      {:error, :invalida} ->
+        {:noreply, put_flash(socket, :error, "O navegador mandou uma inscrição inválida.")}
+    end
+  end
+
+  def handle_event("testar", _params, socket) do
+    Avisos.testar()
+    {:noreply, put_flash(socket, :info, "Aviso de teste enviado.")}
+  end
+
+  def handle_event("avisos_negados", _params, socket) do
+    {:noreply, put_flash(socket, :error, "Permissão de notificação negada no navegador.")}
+  end
+
+  @impl true
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash}>
@@ -83,14 +113,61 @@ defmodule VigiaWeb.PainelLive do
             </span>
           </p>
         </div>
-        <.link
-          :if={@espaco == :real}
-          href={~p"/sair"}
-          method="delete"
-          class="text-sm text-suave underline underline-offset-2 hover:text-texto"
-        >
-          Sair
-        </.link>
+        <div :if={@espaco == :real} class="flex items-center gap-4">
+          <button
+            :if={@avisos}
+            id="avisos"
+            type="button"
+            phx-hook=".Avisos"
+            data-chave={@chave_vapid}
+            class="cursor-pointer rounded-lg border border-borda px-3 py-1.5 text-sm hover:border-texto"
+          >
+            {if @avisos_ativos, do: "Testar aviso", else: "Ativar avisos"}
+          </button>
+          <script :type={Phoenix.LiveView.ColocatedHook} name=".Avisos">
+            const bytes = (b64) => {
+              const base = (b64 + "=".repeat((4 - (b64.length % 4)) % 4)).replace(/-/g, "+").replace(/_/g, "/")
+              return Uint8Array.from(atob(base), (c) => c.charCodeAt(0))
+            }
+
+            export default {
+              async mounted() {
+                if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+                  this.el.hidden = true
+                  return
+                }
+                const registro = await navigator.serviceWorker.register("/sw.js")
+                const inscricao = await registro.pushManager.getSubscription()
+                this.pushEvent("avisos_estado", {ativo: inscricao !== null})
+                this.el.addEventListener("click", () => this.alternar())
+              },
+
+              async alternar() {
+                const registro = await navigator.serviceWorker.ready
+                if (await registro.pushManager.getSubscription()) {
+                  this.pushEvent("testar", {})
+                  return
+                }
+                if ((await Notification.requestPermission()) !== "granted") {
+                  this.pushEvent("avisos_negados", {})
+                  return
+                }
+                const inscricao = await registro.pushManager.subscribe({
+                  userVisibleOnly: true,
+                  applicationServerKey: bytes(this.el.dataset.chave),
+                })
+                this.pushEvent("inscrever", inscricao.toJSON())
+              },
+            }
+          </script>
+          <.link
+            href={~p"/sair"}
+            method="delete"
+            class="text-sm text-suave underline underline-offset-2 hover:text-texto"
+          >
+            Sair
+          </.link>
+        </div>
       </header>
 
       <div

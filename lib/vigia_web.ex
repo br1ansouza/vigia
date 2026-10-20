@@ -1,7 +1,7 @@
 defmodule VigiaWeb do
   @moduledoc false
 
-  def static_paths, do: ~w(assets icons favicon.svg manifest.webmanifest robots.txt)
+  def static_paths, do: ~w(assets icons favicon.svg manifest.webmanifest robots.txt sw.js)
 
   def router do
     quote do

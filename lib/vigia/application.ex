@@ -6,13 +6,20 @@ defmodule Vigia.Application do
 
   @impl true
   def start(_type, _args) do
-    children = [
-      {Phoenix.PubSub, name: Vigia.PubSub},
-      Vigia.Acesso.Limite,
-      Vigia.Tailscale,
-      {Vigia.Monitor, alvos()},
-      VigiaWeb.Endpoint
-    ]
+    children =
+      [
+        {Phoenix.PubSub, name: Vigia.PubSub},
+        {Task.Supervisor, name: Vigia.Tarefas},
+        Vigia.Acesso.Limite,
+        Vigia.Tailscale
+      ] ++
+        if(Vigia.Banco.configurado?(), do: [Vigia.Banco], else: []) ++
+        [
+          Vigia.Inscricoes,
+          {Vigia.Monitor, alvos()},
+          Vigia.Avisos,
+          VigiaWeb.Endpoint
+        ]
 
     Supervisor.start_link(children, strategy: :one_for_one, name: Vigia.Supervisor)
   end

@@ -1,21 +1,16 @@
 defmodule Vigia.Retrato.Postgres do
   @moduledoc """
-  Armazena o retrato numa tabela com uma linha por alvo. Só Postgrex, sem Ecto:
-  são três comandos SQL.
-
-  O banco gratuito do Gigalixir assina o certificado com uma CA própria. Ela
-  fica em `priv/certs/gigalixir-ca.pem` e a conexão valida a cadeia e o
-  hostname contra ela.
+  Armazena o retrato numa tabela com uma linha por alvo, pela conexão de
+  `Vigia.Banco`. Só Postgrex, sem Ecto: são três comandos SQL.
   """
 
   @behaviour Vigia.Retrato
 
   @impl true
   def iniciar(opcoes) do
-    opcoes = Keyword.put_new_lazy(opcoes, :ssl, fn -> tls(opcoes[:hostname]) end)
+    conexao = Keyword.get(opcoes, :conexao, Vigia.Banco)
 
-    with {:ok, conexao} <- Postgrex.start_link(opcoes ++ [pool_size: 1]),
-         {:ok, _} <-
+    with {:ok, _} <-
            Postgrex.query(
              conexao,
              """
@@ -63,30 +58,5 @@ defmodule Vigia.Retrato.Postgres do
       {:ok, _} -> :ok
       {:error, motivo} -> {:error, motivo}
     end
-  end
-
-  @spec opcoes(String.t()) :: keyword()
-  def opcoes(url) do
-    uri = URI.parse(url)
-    [usuario, senha] = uri.userinfo |> String.split(":", parts: 2) |> Enum.map(&URI.decode/1)
-
-    [
-      hostname: uri.host,
-      port: uri.port || 5432,
-      database: String.trim_leading(uri.path, "/"),
-      username: usuario,
-      password: senha,
-      backoff_type: :exp,
-      connect_timeout: 5_000
-    ]
-  end
-
-  defp tls(hostname) do
-    [
-      verify: :verify_peer,
-      cacertfile: Path.join(:code.priv_dir(:vigia), "certs/gigalixir-ca.pem"),
-      server_name_indication: String.to_charlist(hostname),
-      customize_hostname_check: [match_fun: :public_key.pkix_verify_hostname_match_fun(:https)]
-    ]
   end
 end
