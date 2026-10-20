@@ -47,6 +47,27 @@ defmodule Vigia.VerificadorTest do
                Verificador.medir(alvo(), Vigia.Sonda.Http)
     end
 
+    test "conexão reaproveitada que o servidor fechou é tentada de novo uma vez" do
+      {:ok, tentativas} = Agent.start_link(fn -> 0 end)
+
+      Req.Test.stub(Vigia.Sonda.Http, fn conn ->
+        case Agent.get_and_update(tentativas, &{&1, &1 + 1}) do
+          0 -> Req.Test.transport_error(conn, :closed)
+          _ -> Plug.Conn.send_resp(conn, 200, "")
+        end
+      end)
+
+      assert %Leitura{resultado: :no_ar} = Verificador.medir(alvo(), Vigia.Sonda.Http)
+      assert Agent.get(tentativas, & &1) == 2
+    end
+
+    test "conexão fechada duas vezes seguidas fica fora" do
+      Req.Test.stub(Vigia.Sonda.Http, &Req.Test.transport_error(&1, :closed))
+
+      assert %Leitura{resultado: :fora, detalhe: "conexão fechada"} =
+               Verificador.medir(alvo(), Vigia.Sonda.Http)
+    end
+
     test "acima do limite de latência fica lento" do
       Req.Test.stub(Vigia.Sonda.Http, fn conn ->
         Process.sleep(30)

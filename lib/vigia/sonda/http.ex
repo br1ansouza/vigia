@@ -13,7 +13,10 @@ defmodule Vigia.Sonda.Http do
     opcoes =
       [
         url: url,
-        retry: false,
+        retry: &conexao_fechada?/2,
+        max_retries: 1,
+        retry_delay: 0,
+        retry_log_level: false,
         redirect: false,
         decode_body: false,
         receive_timeout: tempo_limite,
@@ -33,7 +36,11 @@ defmodule Vigia.Sonda.Http do
     end
   end
 
+  defp conexao_fechada?(_requisicao, %Req.TransportError{reason: :closed}), do: true
+  defp conexao_fechada?(_requisicao, _resposta), do: false
+
   defp motivo(%Req.TransportError{reason: :timeout}), do: "tempo esgotado"
+  defp motivo(%Req.TransportError{reason: :closed}), do: "conexão fechada"
   defp motivo(%Req.TransportError{reason: :econnrefused}), do: "conexão recusada"
   defp motivo(%Req.TransportError{reason: :nxdomain}), do: "domínio não encontrado"
   defp motivo(%Req.TransportError{reason: reason}), do: inspect(reason)
