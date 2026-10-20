@@ -42,4 +42,15 @@ defmodule Vigia.AlvoTest do
     assert {:error, "tipo desconhecido: \"demo\""} =
              Alvo.de_json(~s([{"id":"a","nome":"A","tipo":"demo"}]))
   end
+
+  test "aceita_status valida códigos HTTP" do
+    base = ~s("id":"a","nome":"A","tipo":"http","url":"https://a.dev")
+
+    assert {:ok, [%Alvo{aceita_status: [403]}]} =
+             Alvo.de_json(~s([{#{base},"aceita_status":[403]}]))
+
+    assert {:ok, [%Alvo{aceita_status: []}]} = Alvo.de_json(~s([{#{base}}]))
+    assert {:error, _} = Alvo.de_json(~s([{#{base},"aceita_status":["403"]}]))
+    assert {:error, _} = Alvo.de_json(~s([{#{base},"aceita_status":403}]))
+  end
 end

@@ -1,6 +1,7 @@
 defmodule Vigia.Sonda.Http do
   @moduledoc """
-  GET simples. Qualquer status 2xx ou 3xx conta como no ar.
+  GET simples. Status 2xx ou 3xx contam como no ar, além dos listados em
+  `aceita_status` (por exemplo, o 403 de um site com bloqueio geográfico).
   """
 
   @behaviour Vigia.Sonda
@@ -8,7 +9,7 @@ defmodule Vigia.Sonda.Http do
   alias Vigia.Alvo
 
   @impl true
-  def verificar(%Alvo{url: url, tempo_limite: tempo_limite}) do
+  def verificar(%Alvo{url: url, tempo_limite: tempo_limite, aceita_status: aceitos}) do
     opcoes =
       [
         url: url,
@@ -22,9 +23,13 @@ defmodule Vigia.Sonda.Http do
       |> Keyword.merge(Application.get_env(:vigia, :req_sonda, []))
 
     case Req.get(opcoes) do
-      {:ok, %Req.Response{status: status}} when status in 200..399 -> {:ok, "HTTP #{status}"}
-      {:ok, %Req.Response{status: status}} -> {:erro, "HTTP #{status}"}
-      {:error, erro} -> {:erro, motivo(erro)}
+      {:ok, %Req.Response{status: status}} ->
+        if status in 200..399 or status in aceitos,
+          do: {:ok, "HTTP #{status}"},
+          else: {:erro, "HTTP #{status}"}
+
+      {:error, erro} ->
+        {:erro, motivo(erro)}
     end
   end
 
