@@ -15,6 +15,6 @@ defmodule VigiaWeb.Router do
   scope "/", VigiaWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", PainelLive
   end
 end
