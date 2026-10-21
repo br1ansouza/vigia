@@ -2,11 +2,12 @@ version: 2
 updates:
   - package-ecosystem: mix
     directory: /
-    schedule:
-      interval: weekly
-      day: monday
-    open-pull-requests-limit: 5
     target-branch: dev
+    schedule:
+      interval: cron
+      cronjob: "0 8 */2 * *"
+      timezone: America/Sao_Paulo
+    open-pull-requests-limit: 5
     commit-message:
       prefix: chore
       include: scope
@@ -16,18 +17,22 @@ updates:
           - "phoenix*"
           - "bandit"
           - "lazy_html"
-      dev:
-        dependency-type: development
+        update-types: [minor, patch]
+      demais:
+        patterns: ["*"]
+        update-types: [minor, patch]
 
   - package-ecosystem: github-actions
     directory: /
-    schedule:
-      interval: weekly
-      day: monday
     target-branch: dev
+    schedule:
+      interval: cron
+      cronjob: "0 8 */2 * *"
+      timezone: America/Sao_Paulo
+    open-pull-requests-limit: 3
     commit-message:
       prefix: ci
     groups:
       actions:
-        patterns:
-          - "*"
+        patterns: ["*"]
+        update-types: [minor, patch]
