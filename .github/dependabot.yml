@@ -4,9 +4,8 @@ updates:
     directory: /
     target-branch: dev
     schedule:
-      interval: weekly
-      day: monday
-      time: "09:00"
+      interval: cron
+      cronjob: "0 9 */2 * *"
       timezone: America/Sao_Paulo
     open-pull-requests-limit: 5
     commit-message:
@@ -27,9 +26,8 @@ updates:
     directory: /
     target-branch: dev
     schedule:
-      interval: weekly
-      day: monday
-      time: "09:00"
+      interval: cron
+      cronjob: "0 9 */2 * *"
       timezone: America/Sao_Paulo
     open-pull-requests-limit: 3
     commit-message:
