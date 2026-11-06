@@ -4,6 +4,9 @@ defmodule Vigia.Sonda.TailscaleTest do
   alias Vigia.{Alvo, Tailscale}
   alias Vigia.Sonda.Tailscale, as: Sonda
 
+  # Aguarda a limpeza das permissões do processo compartilhado antes do próximo teste.
+  setup {Req.Test, :verify_on_exit!}
+
   @dispositivos %{
     "devices" => [
       %{"name" => "tablet.tail1234.ts.net", "hostname" => "tablet", "connectedToControl" => true},
@@ -29,7 +32,7 @@ defmodule Vigia.Sonda.TailscaleTest do
 
   defp stub(plug) do
     Req.Test.stub(Tailscale, plug)
-    Req.Test.allow(Tailscale, self(), Process.whereis(Tailscale))
+    :ok = Req.Test.allow(Tailscale, self(), Process.whereis(Tailscale))
   end
 
   defp api_com_oauth(contador) do
